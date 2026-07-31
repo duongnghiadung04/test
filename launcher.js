@@ -84,7 +84,7 @@
       </header>
       <div class="st-section-head"><p class="st-section-title">Chọn công cụ</p><span class="st-ready">Sẵn sàng</span></div>
       <div class="st-tools"></div>
-      <footer class="st-footer"><div class="st-status" role="status">Đang tải danh mục công cụ...</div><span class="st-version">TOOLKIT 2.0</span></footer>
+      <footer class="st-footer"><div class="st-status" role="status">Đang tải danh mục công cụ...</div><span class="st-version">TOOLKIT 3.0</span></footer>
     </section>`;
   document.body.append(root);
 
@@ -129,12 +129,7 @@
         await loadScript(dependency, `shopee-tool-dependency-${dependency.replace(/[^a-z0-9]+/gi, "-")}`);
       }
 
-      if (tool.entry && typeof window[tool.entry] === "function") {
-        closeLauncher();
-        await window[tool.entry]();
-        return;
-      }
-
+      // Luôn tải lại file công cụ để không dùng hàm cũ còn lưu trong tab Shopee.
       await loadScript(tool.file, `shopee-tool-${tool.id}`);
       if (tool.entry) {
         if (typeof window[tool.entry] !== "function") throw new Error(`Không tìm thấy hàm ${tool.entry}().`);
@@ -169,9 +164,9 @@
 
   (async () => {
     try {
-      if (!Array.isArray(window.SHOPEE_TOOLKIT_CATALOG)) {
-        await loadScript("tools/catalog.js", "shopee-toolkit-catalog-script");
-      }
+      // Luôn tải catalog mới nhất; catalog cũ có thể còn nằm trên window của tab hiện tại.
+      window.SHOPEE_TOOLKIT_CATALOG = undefined;
+      await loadScript("tools/catalog.js", "shopee-toolkit-catalog-script");
       const catalog = window.SHOPEE_TOOLKIT_CATALOG;
       if (!Array.isArray(catalog) || !catalog.length) throw new Error("Danh mục công cụ trống hoặc không hợp lệ.");
       renderCatalog(catalog);
