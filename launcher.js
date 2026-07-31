@@ -63,6 +63,7 @@
     #${ROOT_ID} .st-description{display:-webkit-box;overflow:hidden;color:#64748b;font-size:10.8px;line-height:1.48;-webkit-box-orient:vertical;-webkit-line-clamp:2}
     #${ROOT_ID} .st-arrow{display:grid;width:28px;height:28px;place-items:center;border-radius:9px;color:#94a3b8;background:#f1f5f9;font-size:15px;transition:color .15s,background .15s,transform .15s}
     #${ROOT_ID} .st-tool:hover .st-arrow{color:#fff;background:#ee4d2d;transform:translateX(2px)}
+    #${ROOT_ID} .st-tool[data-tool="auto-save-voucher"]{grid-column:1/-1;min-height:96px;background:linear-gradient(135deg,#fff,#fff8f6)}
     #${ROOT_ID} .st-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 28px 17px;border-top:1px solid #e9eef5;color:#94a3b8;background:#fff;font-size:10.5px}
     #${ROOT_ID} .st-status{min-height:16px;color:#64748b}
     #${ROOT_ID} .st-status[data-error=true]{color:#dc2626}
@@ -154,7 +155,7 @@
       button.className = "st-tool";
       button.type = "button";
       button.dataset.tool = tool.id;
-      const category = tool.id.includes("product") ? "Sản phẩm" : tool.id.includes("wallet") ? "Tài khoản" : tool.id.includes("banner") ? "Chiến dịch" : "Voucher";
+      const category = tool.id.includes("product") ? "Sản phẩm" : tool.id.includes("wallet") ? "Tài khoản" : tool.id.includes("auto") ? "Tự động" : tool.id.includes("banner") ? "Chiến dịch" : "Voucher";
       button.innerHTML = `<span class="st-number">${String(index + 1).padStart(2, "0")}</span><span class="st-copy"><span class="st-meta">${category}</span><span class="st-title">${escapeHtml(tool.title)}</span><span class="st-description">${escapeHtml(tool.description)}</span></span><span class="st-arrow" aria-hidden="true">→</span>`;
       button.addEventListener("click", () => runTool(tool, button));
       toolsContainer.append(button);
