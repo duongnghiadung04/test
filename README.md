@@ -51,7 +51,7 @@ Script IIFE sẽ tự chạy ngay sau khi được tải. Nếu file chỉ khai 
 
 Hai file voucher đều giữ đầy đủ các hàm từ code gốc. Bản Check chỉ ẩn nút Banner; bản Banner chỉ ẩn nút nhập Check thủ công. Khi quét xong, Banner gọi trực tiếp `fetchVouchersBatch(lines)` gốc để hiển thị đầy đủ kết quả, bộ lọc, copy và lưu voucher.
 
-Ví Voucher sử dụng card một cột không ảnh/icon. Giá trị giảm, đơn tối thiểu, mức tối đa và HSD được parse cùng quy tắc với Check Voucher; card hiển thị Promotion ID, mã, phạm vi áp dụng, thời gian claim, HSD, tỷ lệ dùng/lưu và lượt dùng mỗi tài khoản.
+Ví Voucher sử dụng card một cột đồng bộ với Check Voucher, giữ avatar thật và hiển thị `icon_text`/label dưới avatar nhưng bỏ emoji trang trí. Giá trị giảm, đơn tối thiểu, mức tối đa và HSD được parse cùng quy tắc với Check Voucher; card hiển thị Promotion ID, mã, phạm vi áp dụng, thời gian claim, HSD, tỷ lệ dùng/lưu và lượt dùng mỗi tài khoản.
 
 ## Lưu ý
 

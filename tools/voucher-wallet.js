@@ -424,7 +424,10 @@
                 background: #f8fafc;
             }
             .voucher-card {
-                display: block;
+                display: grid;
+                grid-template-columns: 76px minmax(0, 1fr);
+                align-items: start;
+                gap: 14px;
                 padding: 16px 18px;
                 border: 1px solid #e5e7eb;
                 border-radius: 12px;
@@ -437,6 +440,61 @@
             }
             .voucher-right-section {
                 gap: 6px;
+            }
+            .voucher-avatar-section {
+                display: flex;
+                min-width: 0;
+                flex-direction: column;
+                align-items: center;
+                gap: 7px;
+            }
+            .voucher-avatar {
+                display: flex;
+                width: 62px;
+                height: 62px;
+                flex: 0 0 62px;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+                border: 1px solid #e5e7eb;
+                border-radius: 12px;
+                color: #fff;
+                background: #ee4d2d;
+                font-size: 11px;
+                font-weight: 800;
+                line-height: 1.2;
+                text-align: center;
+            }
+            .voucher-avatar.shipping {
+                background: #26aa99;
+            }
+            .voucher-avatar.payment {
+                color: #64748b;
+                background: #f1f5f9;
+            }
+            .voucher-avatar img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+            .voucher-avatar-fallback {
+                display: none;
+                width: 100%;
+                height: 100%;
+                align-items: center;
+                justify-content: center;
+                padding: 5px;
+            }
+            .voucher-avatar-label {
+                width: 76px;
+                overflow: hidden;
+                color: #64748b;
+                font-size: 9.5px;
+                font-weight: 750;
+                line-height: 1.35;
+                text-align: center;
+                text-overflow: ellipsis;
+                white-space: nowrap;
             }
             .voucher-detail-title {
                 color: #ee4d2d;
@@ -492,8 +550,9 @@
                     grid-template-columns: 1fr;
                 }
                 .voucher-card {
-                    padding: 12px 4px;
-                    gap: 12px;
+                    grid-template-columns: 66px minmax(0, 1fr);
+                    padding: 12px;
+                    gap: 10px;
                 }
                 .voucher-icon {
                     width: 70px;
@@ -741,6 +800,9 @@
                 .map(value => String(value || '').trim())
                 .filter(Boolean)
                 .join(' - ');
+            const iconText = String(v.icon_text || '').trim();
+            const labelText = String(v.customised_labels?.[0]?.content || '').trim();
+            const visualText = `${iconText} ${labelText} ${v.sub_icon_text || ''}`.toLowerCase();
             const expired = Boolean(v.end_time && v.end_time * 1e3 < Date.now());
 
             return {
@@ -750,6 +812,11 @@
                 signature: v.signature,
                 terms,
                 applyText,
+                iconHash: String(v.icon_hash || '').trim(),
+                iconText,
+                labelText,
+                isShipping: visualText.includes('mã vận chuyển'),
+                isShopeePay: visualText.includes('shopeepay'),
                 shopId: v.shop_id || v.streamer_shop_id || '',
                 percentageUsed: v.percentage_used ?? 0,
                 percentageClaimed: v.percentage_claimed ?? 0,
@@ -800,12 +867,22 @@
                 const listUrl = `https://shopee.vn/search?promotionId=${voucher.promotionId}&signature=${encodeURIComponent(voucher.signature || '')}`;
                 const detailUrlEscaped = detailUrl.replace(/'/g, "\\'");
                 const voucherCodeEscaped = voucher.code.replace(/'/g, "\\'");
+                const avatarFallback = voucher.isShipping ? 'Vận chuyển' : (voucher.isShopeePay ? 'ShopeePay' : 'Shopee');
+                const avatarClass = voucher.isShipping ? 'shipping' : (voucher.isShopeePay ? 'payment' : '');
+                const avatarLabel = voucher.iconText || voucher.labelText || avatarFallback;
+                const avatarHtml = voucher.iconHash
+                    ? `<div class="voucher-avatar ${avatarClass}"><img src="https://down-vn.img.susercontent.com/file/${escapeHtml(voucher.iconHash)}" alt="${escapeHtml(avatarLabel)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="voucher-avatar-fallback">${escapeHtml(avatarFallback)}</span></div>`
+                    : `<div class="voucher-avatar ${avatarClass}">${escapeHtml(avatarFallback)}</div>`;
                 const warnings = [];
                 if (voucher.fullyUsed) warnings.push('Tối đa lượt dùng');
                 if (voucher.fullyClaimed) warnings.push('Tối đa lượt lưu');
 
                 html += `
                     <div class="voucher-card">
+                        <div class="voucher-avatar-section">
+                            ${avatarHtml}
+                            <div class="voucher-avatar-label" title="${escapeHtml(avatarLabel)}">${escapeHtml(avatarLabel)}</div>
+                        </div>
                         <div class="voucher-right-section">
                             <a class="voucher-detail-title" href="${escapeHtml(detailUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(voucher.terms)}</a>
                             ${voucher.code ? `<div class="voucher-detail-line">- Mã: <strong>${escapeHtml(voucher.displayCode)}</strong></div>` : ''}
