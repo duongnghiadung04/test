@@ -38,7 +38,7 @@
     }
     #${APP_ID} .spe-header {
       display:flex; align-items:center; justify-content:space-between; gap:16px;
-      padding:18px 20px; border-bottom:1px solid var(--line);
+      padding:18px 20px; border-bottom:1px solid var(--line); background:linear-gradient(135deg,#fff,#fff8f6);
     }
     #${APP_ID} h2 { margin:0; font-size:21px; letter-spacing:-.03em; }
     #${APP_ID} .spe-subtitle { margin:3px 0 0; color:var(--muted); font-size:12px; }
@@ -46,6 +46,8 @@
       width:38px; height:38px; border:1px solid var(--line); border-radius:10px;
       color:var(--text); background:var(--soft); font-size:22px; cursor:pointer;
     }
+    #${APP_ID} .spe-header-actions { display:flex; align-items:center; gap:8px; }
+    #${APP_ID} .spe-back { min-height:38px; border-radius:10px; background:#fff; }
     #${APP_ID} .spe-controls { padding:16px 20px; border-bottom:1px solid var(--line); }
     #${APP_ID} .spe-fetch { display:grid; grid-template-columns:1fr auto; gap:10px; }
     #${APP_ID} input {
@@ -129,7 +131,10 @@
           <h2>Shopee Product Link Extractor</h2>
           <p class="spe-subtitle">Hỗ trợ Shop ID, username, link shop và link sản phẩm Shopee.</p>
         </div>
-        <button class="spe-close" type="button" title="Đóng" aria-label="Đóng">×</button>
+        <div class="spe-header-actions">
+          <button class="spe-back" type="button">← Back</button>
+          <button class="spe-close" type="button" title="Đóng" aria-label="Đóng">×</button>
+        </div>
       </header>
       <div class="spe-controls">
         <form class="spe-fetch">
@@ -175,6 +180,7 @@
     copyIds: $(".spe-copy-ids"),
     export: $(".spe-export"),
     clear: $(".spe-clear"),
+    back: $(".spe-back"),
     close: $(".spe-close"),
     status: $(".spe-status"),
     statusText: $(".spe-status-text"),
@@ -543,6 +549,11 @@
     styles.remove();
   }
 
+  function backToToolkit() {
+    closeApp();
+    if (typeof window.ShopeeToolkitBack === "function") window.ShopeeToolkitBack();
+  }
+
   elements.form.addEventListener("submit", (event) => {
     event.preventDefault();
     fetchProducts();
@@ -551,6 +562,7 @@
   elements.copyIds.addEventListener("click", copyItemIds);
   elements.export.addEventListener("click", exportCSV);
   elements.clear.addEventListener("click", clearAll);
+  elements.back.addEventListener("click", backToToolkit);
   elements.close.addEventListener("click", closeApp);
   elements.search.addEventListener("input", (event) => {
     state.search = event.target.value.trim();

@@ -6,6 +6,17 @@
   const currentScriptUrl = document.currentScript?.src || window.SHOPEE_TOOLKIT_LAUNCHER_URL || "";
   const baseUrl = window.SHOPEE_TOOLKIT_BASE_URL || (currentScriptUrl ? new URL(".", currentScriptUrl).href : "");
 
+  window.ShopeeToolkitBack = () => {
+    document.getElementById("shopee-toolkit-loader")?.remove();
+    const script = document.createElement("script");
+    script.id = "shopee-toolkit-loader";
+    const launcherUrl = new URL("launcher.js", baseUrl);
+    launcherUrl.searchParams.set("v", Date.now());
+    script.src = launcherUrl.href;
+    script.onerror = () => alert("Không tải lại được Shopee Toolkit.");
+    document.documentElement.append(script);
+  };
+
   if (!/(^|\.)shopee\.vn$/i.test(location.hostname)) {
     alert("Hãy mở Shopee.vn rồi chạy bookmarklet này.");
     return;

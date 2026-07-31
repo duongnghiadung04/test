@@ -2,6 +2,8 @@
 
 Bộ công cụ JavaScript dạng bookmarklet. Một launcher hiển thị bảng chức năng; mỗi công cụ chỉ được tải khi người dùng bấm vào.
 
+Tất cả công cụ dùng chung giao diện sáng, màu cam Shopee và nút **← Back** để quay lại launcher mà không cần bấm bookmark lần nữa.
+
 ## Cấu trúc
 
 ```text

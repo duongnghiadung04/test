@@ -82,12 +82,13 @@
             }
 
             .voucher-wallet-header {
-                background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
-                color: white;
+                background: linear-gradient(135deg, #ffffff 0%, #fff8f6 100%);
+                color: #111827;
                 padding: 18px 24px;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                border-bottom: 1px solid #edf1f6;
                 border-radius: 16px 16px 0 0;
             }
 
@@ -100,24 +101,42 @@
                 gap: 10px;
             }
 
-            .voucher-wallet-close {
-                background: rgba(255, 255, 255, 0.2);
-                border: none;
-                color: white;
-                width: 36px;
-                height: 36px;
-                border-radius: 50%;
-                cursor: pointer;
+            .voucher-wallet-header-actions {
                 display: flex;
                 align-items: center;
-                justify-content: center;
-                font-size: 20px;
-                transition: all 0.3s ease;
+                gap: 8px;
             }
 
+            .voucher-wallet-back,
+            .voucher-wallet-close {
+                background: white;
+                border: 1px solid #e2e8f0;
+                color: #475569;
+                min-height: 36px;
+                border-radius: 10px;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 700;
+            }
+
+            .voucher-wallet-back {
+                padding: 0 12px;
+                font-size: 12px;
+            }
+
+            .voucher-wallet-close {
+                width: 36px;
+                height: 36px;
+                font-size: 20px;
+            }
+
+            .voucher-wallet-back:hover,
             .voucher-wallet-close:hover {
-                background: rgba(255, 255, 255, 0.3);
-                transform: scale(1.1);
+                border-color: #f1a08d;
+                color: #d93f20;
+                background: #fff8f6;
             }
 
             /* TABS */
@@ -437,9 +456,10 @@
                             <span>🎫</span>
                             <span>Ví Voucher Của Tôi</span>
                         </h2>
-                        <button class="voucher-wallet-close" onclick="closeVoucherWallet()">
-                            ×
-                        </button>
+                        <div class="voucher-wallet-header-actions">
+                            <button class="voucher-wallet-back" id="voucherWalletBackBtn">← Back</button>
+                            <button class="voucher-wallet-close" onclick="closeVoucherWallet()">×</button>
+                        </div>
                     </div>
                     
                     <div class="voucher-tabs">
@@ -467,6 +487,10 @@
         `;
 
         document.body.insertAdjacentHTML('beforeend', modalHTML);
+        document.getElementById('voucherWalletBackBtn').onclick = function() {
+            window.closeVoucherWallet();
+            if (typeof window.ShopeeToolkitBack === 'function') window.ShopeeToolkitBack();
+        };
 
         // Hàm load vouchers từ API
         async function loadVouchers(status) {
@@ -894,4 +918,3 @@
     };
     
 })();
-

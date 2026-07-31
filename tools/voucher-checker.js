@@ -793,12 +793,12 @@
                 ensureResponsiveStyles();
                 const popup = document.createElement("div");
                 popup.id = "voucherInfoPopup";
-                popup.style.cssText = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#ffffff;border-radius:18px;padding:18px;z-index:999999;width:min(680px,calc(100vw - 24px));box-shadow:0 20px 60px rgba(0,0,0,0.18);font-family:'Segoe UI',Roboto,system-ui,-apple-system,sans-serif;color:#111827;max-height:85vh;overflow:hidden;";
+                popup.style.cssText = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#ffffff;border:1px solid #e2e8f0;border-radius:18px;padding:18px;z-index:999999;width:min(680px,calc(100vw - 24px));box-shadow:0 24px 70px rgba(15,23,42,0.20);font-family:Inter,'Segoe UI',Roboto,system-ui,-apple-system,sans-serif;color:#111827;max-height:85vh;overflow:hidden;";
                 popup.innerHTML = `
                     <div id="popupScrollArea" style="max-height:calc(85vh - 36px);overflow-y:auto;padding-right:2px;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin:-18px -18px 14px;padding:16px 18px;border-bottom:1px solid #edf1f6;background:linear-gradient(135deg,#fff,#fff8f6);">
                         <h2 style="font-size:18px;margin:0;color:#EE4D2D;font-weight:800;letter-spacing:.2px;">Check Voucher</h2>
-                        <button id="closePopupBtn" style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;">✖</button>
+                        <div style="display:flex;align-items:center;gap:8px;"><button id="backToToolkitBtn" style="min-height:36px;padding:0 12px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;color:#475569;cursor:pointer;font-size:12px;font-weight:700;">← Back</button><button id="closePopupBtn" style="width:36px;height:36px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;font-size:18px;cursor:pointer;color:#64748b;">✖</button></div>
                     </div>
                     <div style="margin-bottom:10px;">
                         <div style="position:relative;">
@@ -828,6 +828,10 @@
                 document.body.appendChild(popup);
 
                 document.getElementById("closePopupBtn").onclick = () => popup.remove();
+                document.getElementById("backToToolkitBtn").onclick = () => {
+                    popup.remove();
+                    if (typeof window.ShopeeToolkitBack === "function") window.ShopeeToolkitBack();
+                };
                 document.getElementById("loadVoucherBtn").onclick = () => {
                     const val = popup.querySelector("#voucherLinkInput").value.trim();
                     if (val) fetchVouchersBatch(val.split("\n"));
