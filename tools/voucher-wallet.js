@@ -416,6 +416,74 @@
                 display: none; /* Hide old buttons */
             }
 
+            /* Card đồng bộ với Check Voucher: một cột, không icon/ảnh */
+            .voucher-wallet-content {
+                grid-template-columns: 1fr;
+                grid-auto-rows: auto;
+                gap: 12px;
+                background: #f8fafc;
+            }
+            .voucher-card {
+                display: block;
+                padding: 16px 18px;
+                border: 1px solid #e5e7eb;
+                border-radius: 12px;
+                background: #fff;
+                box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+            }
+            .voucher-card:hover {
+                border-color: #f1a08d;
+                box-shadow: 0 8px 22px rgba(238, 77, 45, 0.08);
+            }
+            .voucher-right-section {
+                gap: 6px;
+            }
+            .voucher-detail-title {
+                color: #ee4d2d;
+                font-size: 15px;
+                font-weight: 750;
+                line-height: 1.5;
+                text-decoration: none;
+            }
+            .voucher-detail-title:hover {
+                text-decoration: underline;
+            }
+            .voucher-detail-line {
+                color: #64748b;
+                font-size: 12px;
+                line-height: 1.5;
+            }
+            .voucher-detail-line strong {
+                color: #111827;
+            }
+            .voucher-detail-actions {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 7px;
+                margin-top: 5px;
+            }
+            .voucher-detail-button {
+                min-height: 32px;
+                padding: 0 10px;
+                border: 1px solid #dce3ec;
+                border-radius: 9px;
+                color: #475569;
+                background: #fff;
+                font-size: 11px;
+                font-weight: 700;
+                cursor: pointer;
+            }
+            .voucher-detail-button:hover {
+                border-color: #f1a08d;
+                color: #d93f20;
+                background: #fff8f6;
+            }
+            .voucher-detail-button.primary {
+                border-color: #ee4d2d;
+                color: #fff;
+                background: #ee4d2d;
+            }
+
             /* ... (keep other styles) ... */
 
             /* Mobile responsive */
@@ -453,7 +521,6 @@
                 <div class="voucher-wallet-modal">
                     <div class="voucher-wallet-header">
                         <h2>
-                            <span>🎫</span>
                             <span>Ví Voucher Của Tôi</span>
                         </h2>
                         <div class="voucher-wallet-header-actions">
@@ -591,7 +658,6 @@
                 console.error('Error loading vouchers:', error);
                 content.innerHTML = `
                     <div class="voucher-empty">
-                        <div class="voucher-empty-icon">⚠️</div>
                         <h3>Không thể tải voucher</h3>
                         <p style="color: #dc2626;">${error.message}</p>
                     </div>
@@ -628,79 +694,74 @@
 
         // Hàm parse voucher
         function parseVoucher(v) {
-            // Helper format number: 3300 -> 3.300
-            const fmt = (n) => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-
-            // Format time
-            const formatTime = (timestamp) => {
-                const date = new Date(timestamp * 1000);
-                const hours = String(date.getHours()).padStart(2, '0');
-                const minutes = String(date.getMinutes()).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                return `${hours}:${minutes} | ${day}/${month}`;
-            };
-
-            // Format terms
-            let terms = '';
-            if (v.discount_percentage) {
-                const discountPercentage = v.discount_percentage;
-                const minSpend = fmt(v.min_spend / 100000000);
-                const discountCap = fmt((v.discount_cap || v.max_value) / 100000000);
-                terms = `giảm ${discountPercentage}%, max ${discountCap}k từ ${minSpend}k`;
-            } else if (v.discount_value) {
-                const discountValue = fmt(v.discount_value / 100000000);
-                const minSpend = fmt(v.min_spend / 100000000);
-                terms = `giảm ${discountValue}k từ ${minSpend}k`;
-            } else if (v.coin_percentage) {
-                const discountPercentage = v.coin_percentage;
-                const minSpend = fmt(v.min_spend / 100000000);
-                const discountCap = fmt(v.coin_cap); // coin_cap might be raw units
-                terms = `hoàn ${discountPercentage}%, max ${discountCap}k từ ${minSpend}k`;
-            } else if (v.coin_value) {
-                const discountValue = fmt(v.coin_value); // coin_value might be raw units
-                const minSpend = fmt(v.min_spend / 100000000);
-                terms = `hoàn ${discountValue}k từ ${minSpend}k`;
-            } else if (v.fsv_voucher_card_ui_info && v.fsv_voucher_card_ui_info.int_min_spend_fsv_ui_only != null) {
-                let composedDiscountValue = v.fsv_voucher_card_ui_info.composed_discount_value;
-                let intMinSpend = v.fsv_voucher_card_ui_info.int_min_spend_fsv_ui_only;
-                
-                if (composedDiscountValue !== null && composedDiscountValue !== undefined) {
-                    composedDiscountValue = fmt(Math.round(composedDiscountValue / 100000000));
-                    intMinSpend = fmt(Math.round(intMinSpend / 100000000));
-                    terms = `MPVC giảm tối đa ${composedDiscountValue}k từ ${intMinSpend}k`;
-                } else {
-                    intMinSpend = fmt(Math.round(intMinSpend / 100000000));
-                    terms = `MPVC từ ${intMinSpend}k`;
+            // Dùng cùng đơn vị và cách hiển thị với Check Voucher
+            const formatCurrency = (raw) => {
+                const amount = Math.floor(Number(raw || 0) / 1e5);
+                if (amount === 0) return '₫0đ';
+                if (amount < 1e3) return `₫${amount}đ`;
+                if (amount < 1e6) {
+                    if (amount % 1e3 === 0) return `₫${amount / 1e3}k`;
+                    return `₫${Math.floor(amount / 1e3)}k${amount % 1e3}`;
                 }
-            }
-
-            terms = terms.replace(/max\s*0k/gi, 'không giới hạn');
-
-            // Background color
-            const backgroundVoucherInfoColor = v.voucher_market_type == 1 
-                ? (v.voucher_code?.includes('FSV-') ? '#00bfa5' : '#F05132') 
-                : '#ffffff';
-
+                const millions = Math.floor(amount / 1e6);
+                const remainder = amount % 1e6;
+                if (remainder === 0) return `₫${millions}tr`;
+                if (remainder % 1e3 === 0) return `₫${millions}tr${remainder / 1e3}k`;
+                return `₫${millions}tr${Math.floor(remainder / 1e3)}k`;
+            };
+            const formatTime = (timestamp) => timestamp
+                ? new Date(timestamp * 1e3).toLocaleString('vi-VN')
+                : '';
+            const displayVoucherInfo = () => {
+                try {
+                    if (v.fsv_voucher_card_ui_info) {
+                        const ui = v.fsv_voucher_card_ui_info;
+                        return `Freeship ${formatCurrency(ui.composed_discount_value || 0)} đơn từ ${formatCurrency(ui.int_min_spend_fsv_ui_only || 0)}`;
+                    }
+                    const percentage = v.discount_percentage || v.reward_percentage || v.coin_percentage || 0;
+                    const value = v.discount_value || v.reward_value || v.coin_value || 0;
+                    const cap = v.discount_cap || v.reward_cap || v.coin_cap || v.max_value || 0;
+                    const minimum = v.min_spend || 0;
+                    if (percentage > 0) {
+                        return cap > 0
+                            ? `Giảm ${percentage}% tối đa ${formatCurrency(cap)} đơn từ ${formatCurrency(minimum)}`
+                            : `Giảm ${percentage}% đơn từ ${formatCurrency(minimum)}`;
+                    }
+                    if (value > 0) return `Giảm ${formatCurrency(value)} đơn từ ${formatCurrency(minimum)}`;
+                    return v.display_name || 'Voucher Shopee';
+                } catch {
+                    return 'Voucher Shopee';
+                }
+            };
             const originalCode = v.voucher_code || '';
-            const shortenedCode = shortenVoucherCode(originalCode);
+            let terms = displayVoucherInfo();
+            const voucherTitle = String(v.title || '').trim();
+            if (voucherTitle && !terms.includes(voucherTitle)) terms = `${terms} (${voucherTitle})`;
+            const applyText = [v.icon_text, v.customised_labels?.[0]?.content]
+                .map(value => String(value || '').trim())
+                .filter(Boolean)
+                .join(' - ');
+            const expired = Boolean(v.end_time && v.end_time * 1e3 < Date.now());
 
             return {
                 code: originalCode,
-                displayCode: shortenedCode,
+                displayCode: originalCode,
                 promotionId: v.promotionid,
                 signature: v.signature,
-                terms: terms,
-                iconHash: v.icon_hash,
-                iconText: v.icon_text || '',
-                percentageUsed: v.percentage_used || 0,
-                percentageClaimed: v.percentage_claimed || 0,
-                usageLimitPerUser: v.usage_limit_per_user || null,
+                terms,
+                applyText,
+                shopId: v.shop_id || v.streamer_shop_id || '',
+                percentageUsed: v.percentage_used ?? 0,
+                percentageClaimed: v.percentage_claimed ?? 0,
+                usageLimitPerUser: v.usage_limit_per_user ?? 0,
+                claimStartTime: formatTime(v.claim_start_time),
+                claimEndTime: formatTime(v.claim_end_time),
                 startTime: formatTime(v.start_time),
                 endTime: formatTime(v.end_time),
-                backgroundColor: backgroundVoucherInfoColor,
-                // Include both original terms (formatted) and terms with dots removed (unformatted) for better search
-                searchText: `${originalCode} ${terms} ${terms.replace(/\./g, '')} ${v.icon_text || ''}`.toLowerCase()
+                expired,
+                fullyUsed: Boolean(v.fully_used),
+                fullyClaimed: Boolean(v.fully_claimed),
+                searchText: `${originalCode} ${terms} ${terms.replace(/\./g, '')} ${applyText} ${v.promotionid || ''}`.toLowerCase()
             };
         }
 
@@ -711,7 +772,6 @@
             if (!vouchers || vouchers.length === 0) {
                 content.innerHTML = `
                     <div class="voucher-empty">
-                        <div class="voucher-empty-icon">📭</div>
                         <h3>Không tìm thấy voucher</h3>
                         <p>Bạn chưa có voucher nào trong ví</p>
                     </div>
@@ -719,72 +779,48 @@
                 return;
             }
 
+            const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            })[char]);
+            const encodeVoucherCode = value => {
+                try {
+                    const bytes = new TextEncoder().encode(String(value));
+                    let binary = '';
+                    bytes.forEach(byte => { binary += String.fromCharCode(byte); });
+                    return btoa(binary);
+                } catch {
+                    return btoa(String(value));
+                }
+            };
             let html = '';
-            
+
             vouchers.forEach(voucher => {
-                const usedColor = voucher.percentageUsed > 80 ? 'stat-danger' : 
-                                 voucher.percentageUsed > 50 ? 'stat-warning' : 'stat-success';
-                
-                const claimedColor = voucher.percentageClaimed > 80 ? 'stat-danger' : 
-                                    voucher.percentageClaimed > 50 ? 'stat-warning' : 'stat-success';
-
-                const iconUrl = voucher.iconHash 
-                    ? `https://down-vn.img.susercontent.com/file/${voucher.iconHash}`
-                    : '';
-
-                const voucherUrl = `https://shopee.vn/search?promotionId=${voucher.promotionId}&signature=${voucher.signature}&voucherCode=${voucher.code}`;
-                const voucherUrlEscaped = voucherUrl.replace(/'/g, "\\'");
+                const detailCode = voucher.code || `AUTO-${voucher.promotionId}`;
+                const detailUrl = `https://shopee.vn/voucher/details?evcode=${encodeURIComponent(encodeVoucherCode(detailCode))}&from_source=voucher-wallet&promotionId=${voucher.promotionId}&signature=${encodeURIComponent(voucher.signature || '')}`;
+                const listUrl = `https://shopee.vn/search?promotionId=${voucher.promotionId}&signature=${encodeURIComponent(voucher.signature || '')}`;
+                const detailUrlEscaped = detailUrl.replace(/'/g, "\\'");
                 const voucherCodeEscaped = voucher.code.replace(/'/g, "\\'");
+                const warnings = [];
+                if (voucher.fullyUsed) warnings.push('Tối đa lượt dùng');
+                if (voucher.fullyClaimed) warnings.push('Tối đa lượt lưu');
 
                 html += `
                     <div class="voucher-card">
-                        ${iconUrl ? `
-                            <div class="voucher-icon-section" title="Mở link voucher">
-                                <img 
-                                    src="${iconUrl}" 
-                                    class="voucher-icon" 
-                                    alt="Voucher"
-                                    style="background-color: ${voucher.backgroundColor}; cursor: pointer;"
-                                    onclick="useVoucher('${voucherUrlEscaped}')"
-                                >
-                                ${voucher.iconText ? `<div class="voucher-icon-text">${voucher.iconText}</div>` : ''}
-                            </div>
-                        ` : ''}
-                        
                         <div class="voucher-right-section">
-                            <!-- Helper line: Code + Copy Link Icon -->
-                            <div class="voucher-line-wrapper">
-                                <div class="voucher-code" onclick="copyVoucherCodeOnly('${voucherCodeEscaped}')" title="Click để copy mã: ${voucher.code}">
-                                    ${voucher.displayCode}
-                                </div>
-                                <span class="action-icon icon-copy-link" onclick="copyVoucherUrl('${voucherUrlEscaped}')" title="Copy Link Voucher">
-                                    📋
-                                </span>
-                            </div>
-
-                            <!-- Helper line: Terms + Use Icon -->
-                            <div class="voucher-line-wrapper">
-                                <div class="voucher-terms" title="${voucher.terms}">${voucher.terms}</div>
-                            </div>
-                            
-                            <div class="voucher-stats">
-                                <div class="voucher-stat-item">
-                                    <span class="voucher-stat-icon">📊</span>
-                                    <span>Đã dùng <span class="voucher-stat-value ${usedColor}">${voucher.percentageUsed}%</span></span>
-                                </div>
-                                <div class="voucher-stat-item" id="claimedstatus">
-                                    <span class="voucher-stat-icon">🔖</span>
-                                    <span>Đã lưu <span class="voucher-stat-value ${claimedColor}">${voucher.percentageClaimed}%</span></span>
-                                </div>
-                            </div>
-                            
-                            <div class="voucher-stat-item">
-                                <span class="voucher-stat-icon">🔄</span>
-                                <span>Lượt dùng tối đa: <span class="voucher-stat-value">${voucher.usageLimitPerUser}</span></span>
-                            </div>
-                            
-                            <div class="voucher-time">
-                                ⏰ ${voucher.startTime} - ${voucher.endTime}
+                            <a class="voucher-detail-title" href="${escapeHtml(detailUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(voucher.terms)}</a>
+                            ${voucher.code ? `<div class="voucher-detail-line">- Mã: <strong>${escapeHtml(voucher.displayCode)}</strong></div>` : ''}
+                            <div class="voucher-detail-line">- Promotion ID: <strong>${escapeHtml(voucher.promotionId)}</strong></div>
+                            ${voucher.applyText ? `<div class="voucher-detail-line">- Áp dụng: <strong>${escapeHtml(voucher.applyText)}</strong></div>` : ''}
+                            ${voucher.claimStartTime || voucher.claimEndTime ? `<div class="voucher-detail-line">- Claim: ${escapeHtml(voucher.claimStartTime || '--')} | ${escapeHtml(voucher.claimEndTime || '--')}</div>` : ''}
+                            ${voucher.startTime || voucher.endTime ? `<div class="voucher-detail-line" style="color:${voucher.expired ? '#dc2626' : '#64748b'}">- HSD: ${escapeHtml(voucher.startTime || '--')} | ${escapeHtml(voucher.endTime || '--')}${voucher.expired ? ' <strong style="color:#dc2626">(Hết hạn)</strong>' : ''}</div>` : ''}
+                            <div class="voucher-detail-line">Đã dùng: ${voucher.percentageUsed}% | Đã lưu: ${voucher.percentageClaimed}%</div>
+                            ${voucher.usageLimitPerUser ? `<div class="voucher-detail-line">Lượt dùng / user: ${voucher.usageLimitPerUser}</div>` : ''}
+                            ${warnings.length ? `<div class="voucher-detail-line" style="color:#dc2626;font-weight:700">${warnings.join(' • ')}</div>` : ''}
+                            <div class="voucher-detail-actions">
+                                ${voucher.code ? `<button class="voucher-detail-button" onclick="copyVoucherCodeOnly('${voucherCodeEscaped}')">Copy mã</button>` : ''}
+                                <button class="voucher-detail-button" onclick="copyVoucherUrl('${detailUrlEscaped}')">Copy link</button>
+                                <button class="voucher-detail-button primary" onclick="useVoucher('${detailUrlEscaped}')">Chi tiết</button>
+                                <button class="voucher-detail-button" onclick="useVoucher('${listUrl.replace(/'/g, "\\'")}')">List</button>
                             </div>
                         </div>
                     </div>
@@ -860,7 +896,7 @@
         // Hàm copy chỉ mã voucher (khi click vào tên mã)
         window.copyVoucherCodeOnly = function(code) {
             navigator.clipboard.writeText(code).then(() => {
-                showCopyToastVoucher(`✅ Đã copy mã: ${code}`);
+                showCopyToastVoucher(`Đã copy mã: ${code}`);
             }).catch(() => {
                 // Fallback
                 const textarea = document.createElement('textarea');
@@ -869,14 +905,14 @@
                 textarea.select();
                 document.execCommand('copy');
                 document.body.removeChild(textarea);
-                showCopyToastVoucher(`✅ Đã copy mã: ${code}`);
+                showCopyToastVoucher(`Đã copy mã: ${code}`);
             });
         };
 
         // Hàm copy URL đầy đủ (nút Copy)
         window.copyVoucherUrl = function(url) {
             navigator.clipboard.writeText(url).then(() => {
-                showCopyToastVoucher(`✅ Đã copy link voucher`);
+                showCopyToastVoucher(`Đã copy link voucher`);
             }).catch(() => {
                 // Fallback
                 const textarea = document.createElement('textarea');
@@ -885,7 +921,7 @@
                 textarea.select();
                 document.execCommand('copy');
                 document.body.removeChild(textarea);
-                showCopyToastVoucher(`✅ Đã copy link voucher`);
+                showCopyToastVoucher(`Đã copy link voucher`);
             });
         };
 
