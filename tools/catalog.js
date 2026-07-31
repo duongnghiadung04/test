@@ -19,19 +19,17 @@ window.SHOPEE_TOOLKIT_CATALOG = [
   {
     id: "voucher-checker",
     title: "Check Voucher",
-    description: "Kiểm tra link, Promotion ID hoặc ID:SIGN và lưu voucher.",
+    description: "Bản đầy đủ: kiểm tra link/ID, lọc, copy, lưu voucher và xem thông tin chi tiết.",
     file: "tools/voucher-checker.js",
-    dependencies: ["tools/voucher-core.js"],
     icon: "CV",
-    existingSelector: "#svt-check-voucher"
+    existingSelector: "#voucherInfoPopup"
   },
   {
     id: "banner-voucher",
     title: "Banner Voucher",
-    description: "Quét banner, lấy ID:SIGN rồi đưa qua bộ Check Voucher dùng chung.",
+    description: "Quét/Xem banner, lấy ID:SIGN rồi đưa vào bộ Check Voucher đầy đủ.",
     file: "tools/banner-voucher.js",
-    dependencies: ["tools/voucher-core.js"],
     icon: "BV",
-    existingSelector: "#svt-banner-voucher"
+    existingSelector: "#voucherInfoPopup"
   }
 ];

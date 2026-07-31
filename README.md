@@ -11,9 +11,8 @@ bookmarklet.txt                    Mẫu bookmarklet thủ công
 tools/catalog.js                   Danh mục công cụ
 tools/product-link-extractor.js    Shopee Product Link Extractor
 tools/voucher-wallet.js            Ví Voucher
-tools/voucher-core.js              Logic kiểm tra dùng chung
-tools/voucher-checker.js           Check Voucher độc lập
-tools/banner-voucher.js            Quét và kiểm tra Banner độc lập
+tools/voucher-checker.js           Check Voucher đầy đủ, tách giao diện Check
+tools/banner-voucher.js            Code đầy đủ, tách giao diện Quét/Xem Banner
 ```
 
 ## Đưa lên GitHub Pages
@@ -24,6 +23,10 @@ tools/banner-voucher.js            Quét và kiểm tra Banner độc lập
 4. Mở địa chỉ `https://USERNAME.github.io/REPOSITORY/`.
 5. Kéo nút **Kéo nút này lên thanh Bookmark** lên thanh dấu trang.
 6. Đăng nhập `shopee.vn`, sau đó bấm bookmark **Shopee Toolkit**.
+
+### Nếu Deploy from a branch bị kẹt
+
+Repository đã có sẵn `.github/workflows/pages.yml`. Trong **Settings → Pages**, đổi **Source** thành **GitHub Actions**, sau đó vào tab **Actions** và chạy workflow **Deploy Shopee Toolkit to GitHub Pages**. Mỗi lần push vào `main`, site sẽ tự deploy lại.
 
 Nếu không kéo được nút, hãy tạo bookmark mới và dán nội dung do nút **Copy Bookmarklet** cung cấp vào trường URL.
 
@@ -44,7 +47,7 @@ Nếu không kéo được nút, hãy tạo bookmark mới và dán nội dung d
 
 Script IIFE sẽ tự chạy ngay sau khi được tải. Nếu file chỉ khai báo một hàm toàn cục, thêm `entry: "tenHam"` để launcher gọi hàm đó sau khi tải.
 
-Có thể khai báo `dependencies: ["tools/file-dung-chung.js"]` để launcher tải lõi dùng chung trước công cụ. `Check Voucher` và `Banner Voucher` hiện cùng dùng `voucher-core.js`; Banner quét ID/signature rồi chuyển dữ liệu vào đúng bộ kiểm tra này.
+Hai file voucher đều giữ đầy đủ các hàm từ code gốc. Bản Check chỉ ẩn nút Banner; bản Banner chỉ ẩn nút nhập Check thủ công. Khi quét xong, Banner gọi trực tiếp `fetchVouchersBatch(lines)` gốc để hiển thị đầy đủ kết quả, bộ lọc, copy và lưu voucher.
 
 ## Lưu ý
 
