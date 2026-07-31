@@ -1,0 +1,1 @@
+javascript:(()=>{const d=document,o=d.getElementById('shopee-toolkit-loader');if(o)o.remove();const s=d.createElement('script');s.id='shopee-toolkit-loader';s.src='https://YOUR_USERNAME.github.io/YOUR_REPOSITORY/launcher.js?v='+Date.now();s.onerror=()=>alert('Không tải được Shopee Toolkit');d.documentElement.appendChild(s)})()

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Shopee Toolkit Bookmarklet</title>
+  <style>
+    *{box-sizing:border-box}body{min-height:100vh;margin:0;display:grid;place-items:center;padding:24px;color:#172033;background:radial-gradient(circle at 10% 0,rgba(238,77,45,.12),transparent 35rem),#f4f7fb;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.card{width:min(720px,100%);padding:28px;border:1px solid #e2e8f0;border-radius:22px;background:#fff;box-shadow:0 28px 90px rgba(15,23,42,.14)}.eyebrow{margin:0 0 8px;color:#e64727;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}h1{margin:0;color:#111827;font-size:clamp(28px,5vw,44px);letter-spacing:-.05em;line-height:1.05}p{color:#64748b;line-height:1.6}.step{margin-top:24px;padding-top:20px;border-top:1px solid #edf1f6}label{display:block;margin-bottom:8px;color:#334155;font-size:12px;font-weight:800}input{width:100%;min-height:46px;padding:0 13px;border:1px solid #dce3ec;border-radius:10px;outline:none;color:#172033;background:#f8fafc;font:inherit}input:focus{border-color:#ee4d2d;background:#fff;box-shadow:0 0 0 3px rgba(238,77,45,.13)}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}.bookmark,.button{display:inline-flex;min-height:43px;align-items:center;justify-content:center;padding:0 16px;border:0;border-radius:10px;color:#fff;background:linear-gradient(135deg,#ff6747,#e83d1c);font-size:13px;font-weight:800;text-decoration:none;cursor:grab}.button{background:#475569;cursor:pointer}.hint{margin:10px 0 0;color:#64748b;font-size:12px}.code{width:100%;min-height:94px;margin-top:12px;padding:12px;border:1px solid #dce3ec;border-radius:10px;color:#334155;background:#f8fafc;font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;resize:vertical}.toast{color:#047857;font-size:12px;font-weight:700}@media(max-width:520px){.card{padding:20px}.actions>*{width:100%}}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <p class="eyebrow">One-click launcher</p>
+    <h1>Shopee Toolkit</h1>
+    <p>Một bookmarklet mở bảng công cụ trên Shopee. Mỗi chức năng chỉ được tải từ repo khi bạn bấm vào nó.</p>
+    <section class="step">
+      <label for="baseUrl">URL thư mục đã chứa launcher.js</label>
+      <input id="baseUrl" type="url" spellcheck="false">
+      <div class="actions">
+        <a class="bookmark" id="bookmark" href="#">Kéo nút này lên thanh Bookmark</a>
+        <button class="button" id="copy" type="button">Copy Bookmarklet</button>
+      </div>
+      <textarea class="code" id="code" readonly aria-label="Mã bookmarklet"></textarea>
+      <p class="hint">Sau đó mở shopee.vn và bấm bookmark “Shopee Toolkit”.</p>
+      <span class="toast" id="toast" aria-live="polite"></span>
+    </section>
+  </main>
+  <script>
+    const baseInput=document.getElementById("baseUrl");
+    const bookmark=document.getElementById("bookmark");
+    const code=document.getElementById("code");
+    const toast=document.getElementById("toast");
+    const isHosted=/^https?:$/.test(location.protocol);
+    baseInput.value=isHosted?new URL(".",location.href).href:"https://YOUR_USERNAME.github.io/YOUR_REPOSITORY/";
+    function update(){
+      let base=baseInput.value.trim();
+      if(!base.endsWith("/"))base+="/";
+      const launcher=new URL("launcher.js",base).href;
+      const value=`javascript:(()=>{const d=document,o=d.getElementById('shopee-toolkit-loader');if(o)o.remove();const s=d.createElement('script');s.id='shopee-toolkit-loader';s.src=${JSON.stringify(launcher)}+'?v='+Date.now();s.onerror=()=>alert('Không tải được Shopee Toolkit');d.documentElement.appendChild(s)})()`;
+      code.value=value;
+      bookmark.href=value;
+    }
+    baseInput.addEventListener("input",update);
+    document.getElementById("copy").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(code.value);toast.textContent="Đã copy!";setTimeout(()=>toast.textContent="",2200)}catch{code.select();document.execCommand("copy")}});
+    update();
+  </script>
+</body>
+</html>
