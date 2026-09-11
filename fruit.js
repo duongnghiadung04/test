@@ -278,7 +278,109 @@
     updatePipButton();
   }
 
+  function isAndroidPipSupported() {
+    const ua = navigator.userAgent || '';
+    return /Android/i.test(ua) && !!HTMLVideoElement.prototype.requestPictureInPicture;
+  }
+
+  let androidPip = null;
+
+  function drawAndroidPipCanvas() {
+    if (!androidPip?.canvas || !androidPip.ctx) return;
+    const c = androidPip.canvas;
+    const ctx = androidPip.ctx;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = 720;
+    const h = 480;
+    if (c.width !== w * dpr || c.height !== h * dpr) {
+      c.width = w * dpr;
+      c.height = h * dpr;
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = '#111216';
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '700 22px Arial';
+    ctx.fillText('Shopee Farm Helper', 18, 32);
+    ctx.font = '13px Consolas, monospace';
+    const box = panel.querySelector('#sf_log');
+    const lines = box ? [...box.querySelectorAll('.sf_logline')].slice(-22) : [];
+    let y = 58;
+    for (const el of lines) {
+      let text = (el.textContent || '').replace(/\s+/g, ' ').trim();
+      if (text.length > 105) text = text.slice(0, 102) + '...';
+      ctx.fillStyle = '#d5d8e0';
+      ctx.fillText(text, 18, y);
+      y += 18;
+      if (y > h - 12) break;
+    }
+    if (!lines.length) {
+      ctx.fillStyle = '#9da3b0';
+      ctx.fillText('Đang chờ log...', 18, y);
+    }
+  }
+
+  async function closeAndroidPip() {
+    const state = androidPip;
+    androidPip = null;
+    if (!state) return;
+    try { if (state.video?.disablePictureInPicture !== undefined) state.video.disablePictureInPicture = true; } catch {}
+    try { if (document.pictureInPictureElement === state.video) await document.exitPictureInPicture(); } catch {}
+    try { state.video.pause(); } catch {}
+    try { state.stream?.getTracks().forEach(t => t.stop()); } catch {}
+    try { state.video.remove(); } catch {}
+    if (state.observer) state.observer.disconnect();
+    stopPipKeepAlive();
+    updatePipButton();
+  }
+
+  async function toggleAndroidPip() {
+    if (androidPip) {
+      await closeAndroidPip();
+      return true;
+    }
+    if (!isAndroidPipSupported()) return false;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx || !canvas.captureStream) return false;
+    canvas.width = 720;
+    canvas.height = 480;
+    const stream = canvas.captureStream(5);
+    const video = document.createElement('video');
+    video.muted = true;
+    video.playsInline = true;
+    video.autoplay = true;
+    video.disablePictureInPicture = false;
+    video.srcObject = stream;
+    video.style.cssText = 'position:fixed;left:-10000px;top:-10000px;width:2px;height:2px;opacity:0;pointer-events:none;';
+    document.documentElement.appendChild(video);
+    androidPip = { canvas, ctx, stream, video, observer: null };
+    const observer = new MutationObserver(() => drawAndroidPipCanvas());
+    const box = panel.querySelector('#sf_log');
+    if (box) observer.observe(box, { childList: true, subtree: true, characterData: true });
+    androidPip.observer = observer;
+    drawAndroidPipCanvas();
+    try {
+      await video.play();
+      await video.requestPictureInPicture();
+      startPipKeepAlive();
+      video.addEventListener('leavepictureinpicture', () => { void closeAndroidPip(); }, { once: true });
+      updatePipButton();
+      return true;
+    } catch (error) {
+      await closeAndroidPip();
+      log(`PiP Android không khả dụng: ${error?.message || error}`, 'warn');
+      return true;
+    }
+  }
+
   async function togglePip() {
+    // Android Chrome không hỗ trợ Document Picture-in-Picture như desktop.
+    // Dùng Video Picture-in-Picture để tạo cửa sổ nổi thật và render log lên canvas.
+    if (isAndroidPipSupported()) {
+      const handled = await toggleAndroidPip();
+      if (handled) return;
+    }
     if (pipWindow && !pipWindow.closed) {
       restorePanelHome({ closePip: true });
       return;
